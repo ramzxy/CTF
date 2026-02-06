@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "ghidra": {
+      "command": "uv",
+      "args": [
+        "run",
+        "C:\\Users\\ilia\\Downloads\\GhidraMCP-release-1-4\\GhidraMCP-release-1-4\\bridge_mcp_ghidra.py"
+      ]
+    }
+  }
+}
