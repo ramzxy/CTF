@@ -10,10 +10,11 @@ from pwn import *
 # The output will show stack values. We look for "DEADBEEF" (0xdeadbeef) or similar.
 
 def main():
-    if len(sys.argv) < 3:
+    if len(sys.argv) < 4:
         print("Usage: python3 find_offset.py REMOTE <HOST> <PORT>")
         return
 
+    # Assuming sys.argv is ['find_offset.py', 'REMOTE', 'HOST', 'PORT']
     host = sys.argv[2]
     port = int(sys.argv[3])
     

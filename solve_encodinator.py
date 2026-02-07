@@ -326,7 +326,12 @@ def solve():
     final_payload = input_payload + addresses_block
     
     if args.REMOTE:
-        p = remote(sys.argv[1], int(sys.argv[2]))
+        if len(sys.argv) < 4:
+            log.error("Usage: python3 solve_encodinator.py REMOTE <HOST> <PORT>")
+            return
+        host = sys.argv[2]
+        port = int(sys.argv[3])
+        p = remote(host, port)
     else:
         # Since we can't run locally on ARM, we just print payload or skip
         # Logic allows calling via python3 solve.py REMOTE HOST PORT
