@@ -10,7 +10,14 @@
       "Bash(readelf:*)",
       "Bash({ echo '%8$p.%30$p.%31$p.%32$p.%33$p')",
       "Bash(})",
-      "Bash(nc:*)"
+      "Bash(nc:*)",
+      "Bash(checksec:*)",
+      "Bash(xxd:*)",
+      "Bash(curl:*)",
+      "Bash(done)",
+      "Bash(__NEW_LINE_916c036e39cedd63__ echo \"\")",
+      "Bash(__NEW_LINE_9fc103066375c6fb__ echo \"\")",
+      "Bash(__NEW_LINE_2ef4956b1567f5b9__ rm $COOKIES)"
     ]
   },
   "enableAllProjectMcpServers": true,
