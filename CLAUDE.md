@@ -23,6 +23,7 @@ challenges/
       README.md             # Challenge description, URL, hints
       solve.py              # Solution script
       flag.txt              # Captured flag
+      WRITEUP.md            # Short post-solve writeup
       files/                # Challenge-provided files
 scripts/                    # Reusable utility scripts
 tools/                      # Custom tools
@@ -37,8 +38,30 @@ When given a challenge to solve:
 2. **Save description**: Write challenge info to `README.md`
 3. **Download files**: Save provided files to `files/` subdirectory
 4. **Analyze**: Run initial recon based on category
-5. **Solve**: Write exploit in `solve.py` (or appropriate language)
+5. **Solve**: Write exploit in `solve.py` (or appropriate language). Non-trivial solution scripts should be saved to files in the challenge directory so the writeup can reference them. Quick one-liners and small snippets can run inline.
 6. **Capture**: Save flag to `flag.txt`
+7. **Write up**: Write a short writeup to `WRITEUP.md` (see format below)
+
+## Writeup Format
+
+After solving every challenge, write `WRITEUP.md` in the challenge directory. Keep it concise — a few paragraphs, not an essay.
+
+```markdown
+# <Challenge Name>
+
+**Category:** <category> | **Points:** <points if known> | **Flag:** `<flag>`
+
+## Overview
+One-sentence description of what the challenge gives you.
+
+## Solution
+Short explanation of the approach and key insights. Include relevant details
+like vulnerability type, algorithm, or trick used. Reference `solve.py` for
+the full exploit.
+
+## Key Takeaways
+- Bullet points of techniques/lessons worth remembering for future challenges.
+```
 
 ## Environment & Tools
 
@@ -84,6 +107,7 @@ Use `/solve-challenge` to start solving. Category-specific skills are loaded aut
 
 ## Coding Conventions for Exploits
 
+- **Save non-trivial solve scripts to files** (e.g. `solve.py`) in the challenge directory so writeups can reference them. Small one-liners are fine to run inline.
 - Use `pwntools` for binary exploitation and network interaction
 - Use `requests` for HTTP-based challenges
 - Use `pycryptodome` for crypto operations

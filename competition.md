@@ -1,8 +1,8 @@
 # Current Competition
 
-- **Name**: ENO CTF
-- **Date**: 2026-02-08
+- **Name**: Nullcon HackIM CTF Goa 2026
+- **Date**: 2026-02-07
 - **Flag format**: `ENO{...}` (e.g., `ENO{th1s_is_4n_eXample}`)
-- **URL**:
-- **Team**:
-- **Notes**:
+- **URL**: https://ctf.nullcon.net
+- **Team**: rmxzy
+- **Notes**: CTFd platform. 36 challenges across categories: misc, web, rev, cry, pwn, welcome.

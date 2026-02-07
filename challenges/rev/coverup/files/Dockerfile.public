@@ -1,0 +1,23 @@
+FROM php:7.4-apache
+
+RUN pecl install xdebug-3.1.5 \
+    && docker-php-ext-enable xdebug
+
+RUN echo "xdebug.mode=coverage" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
+    && echo "xdebug.start_with_request=yes" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+
+RUN mkdir -p /var/www/html/output \
+    && chown -R www-data:www-data /var/www/html/output \
+    && chmod 755 /var/www/html/output
+
+COPY encrypt.php /var/www/html/
+COPY generate_challenge.php /var/www/html/
+RUN echo "ENO{FAKEFLAG}" > /var/www/html/flag.txt
+
+RUN chown -R www-data:www-data /var/www/html \
+    && chmod 644 /var/www/html/*.php \
+    && chmod 600 /var/www/html/flag.txt
+
+WORKDIR /var/www/html
+
+CMD ["sh", "-c", "php generate_inline_encrypt.php && php generate_challenge.php"]
