@@ -3,7 +3,14 @@
     "allow": [
       "Bash(git init:*)",
       "Bash(python3:*)",
-      "Bash(objdump:*)"
+      "Bash(objdump:*)",
+      "Bash(nm:*)",
+      "Bash(gtimeout:*)",
+      "Bash(tee:*)",
+      "Bash(readelf:*)",
+      "Bash({ echo '%8$p.%30$p.%31$p.%32$p.%33$p')",
+      "Bash(})",
+      "Bash(nc:*)"
     ]
   },
   "enableAllProjectMcpServers": true,

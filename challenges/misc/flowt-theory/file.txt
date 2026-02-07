@@ -1,0 +1,239 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BillSplitter Lite | Financial Oracle</title>
+    <style>
+        :root {
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --primary: #4f46e5;
+            --secondary: #6366f1;
+            --text: #1e293b;
+            --accent: #94a3b8;
+            --green: #10b981;
+            --red: #ef4444;
+        }
+        body { 
+            font-family: 'Inter', -apple-system, sans-serif; 
+            background-color: var(--bg);
+            color: var(--text);
+            max-width: 800px; 
+            margin: 2rem auto; 
+            padding: 0 1rem;
+        }
+        .header { text-align: center; margin-bottom: 2rem; }
+        .card { 
+            background: var(--card-bg);
+            padding: 2rem; 
+            border-radius: 16px; 
+            margin-bottom: 1.5rem; 
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
+        }
+        .total-display {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        .total-amount { font-size: 2.2rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+        
+        .receipt-list { list-style: none; padding: 0; }
+        .receipt-item { 
+            display: flex; 
+            justify-content: space-between; 
+            padding: 1rem 0; 
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .view-btn {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        /* Settlement Styles */
+        .settlement-row {
+            display: flex;
+            align-items: center;
+            padding: 0.8rem;
+            background: #f1f5f9;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        .arrow { margin: 0 10px; color: var(--accent); }
+        .money { font-weight: bold; color: var(--green); }
+
+        .input-row { display: flex; gap: 0.5rem; margin-bottom: 0.75rem; }
+        input { 
+            flex: 1;
+            padding: 0.75rem; 
+            border: 1px solid #cbd5e1; 
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+        .btn-group { display: flex; gap: 1rem; margin-top: 1rem; }
+        button { 
+            flex: 1;
+            padding: 0.8rem;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+        .btn-add { background: #f1f5f9; color: var(--text); border: 1px solid #cbd5e1; }
+        .btn-submit { background: var(--primary); color: white; }
+        .btn-submit:hover { background: var(--secondary); transform: translateY(-1px); }
+        
+        pre { background: #0f172a; color: #38bdf8; padding: 1.5rem; border-radius: 8px; overflow-x: auto; }
+        .admin-note { font-size: 0.75rem; color: var(--accent); margin-top: 1.5rem; border-top: 1px solid #e2e8f0; padding-top: 1rem; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>BillSplitter <span style="font-weight: 300;">Lite</span></h1>
+</div>
+
+<div class="card">
+    <div class="total-display">
+        <span>Vault Balance (Total)</span>
+        <span class="total-amount">110.01000</span>
+    </div>
+
+    <h3>Transaction Records</h3>
+    <ul class="receipt-list">
+                    <li class="receipt-item">
+                <span><strong>Alice</strong>: $100</span>
+                <a href="?view_receipt=Alice" class="view-btn">View Log →</a>
+            </li>
+                    <li class="receipt-item">
+                <span><strong>Bob</strong>: $10</span>
+                <a href="?view_receipt=Bob" class="view-btn">View Log →</a>
+            </li>
+                    </ul>
+</div>
+
+<div class="card" id="settlement-card" style="display:none;">
+    <h3>Settlement Plan</h3>
+    <p style="font-size: 0.9rem; color: var(--accent); margin-bottom: 1rem;">Optimal transfers to balance the group:</p>
+    <div id="settlement-list"></div>
+</div>
+
+
+<div class="card">
+    <h3>Add New Transactions</h3>
+    <form method="POST" id="billForm">
+        <div id="inputs-container">
+            <div class="input-row">
+                <input type="text" name="names[]" value="Alice" placeholder="Filename">
+                <input type="text" name="amounts[]" value="100.00" placeholder="Amount">
+            </div>
+            <div class="input-row">
+                <input type="text" name="names[]" value="Bob" placeholder="Filename">
+                <input type="text" name="amounts[]" value="50.00" placeholder="Amount">
+            </div>
+        </div>
+        
+        <div class="btn-group">
+            <button type="button" class="btn-add" onclick="addRow()">+ Add Friend</button>
+            <button type="submit" class="btn-submit">Calculate Group Total</button>
+        </div>
+    </form>
+    
+    <div class="admin-note">
+        <p><strong>System Note:</strong> Since we take security very serious, all of your data is stored in super secure files on our server. We add a secret administrative fee of 0.01 to every calculation.</p>
+    </div>
+</div>
+
+<script>
+const rawReceipts = {"Alice":100,"Bob":10};
+
+function addRow() {
+    const container = document.getElementById('inputs-container');
+    const div = document.createElement('div');
+    div.className = 'input-row';
+    div.innerHTML = `
+        <input type="text" name="names[]" placeholder="Filename">
+        <input type="text" name="amounts[]" placeholder="0.00">
+    `;
+    container.appendChild(div);
+}
+
+function calculateDebts() {
+    const peopleNames = Object.keys(rawReceipts);
+    if (peopleNames.length < 2) return; 
+
+    let people = [];
+    let total = 0;
+
+    peopleNames.forEach(name => {
+        let paid = parseFloat(rawReceipts[name]);
+        if (!isNaN(paid)) {
+            total += paid;
+            people.push({ name: name, paid: paid, balance: 0 });
+        }
+    });
+    
+    if (total === 0) return;
+
+    let average = total / people.length;
+    
+    people.forEach(p => {
+        p.balance = p.paid - average;
+    });
+
+    let debtors = people.filter(p => p.balance < -0.01).sort((a, b) => a.balance - b.balance);
+    let creditors = people.filter(p => p.balance > 0.01).sort((a, b) => b.balance - a.balance);
+
+    const container = document.getElementById('settlement-list');
+    const card = document.getElementById('settlement-card');
+    container.innerHTML = ''; 
+
+    if (debtors.length > 0 && creditors.length > 0) {
+        card.style.display = 'block';
+
+        let i = 0; 
+        let j = 0; 
+
+        while (i < debtors.length && j < creditors.length) {
+            let debtor = debtors[i];
+            let creditor = creditors[j];
+            let amount = Math.min(Math.abs(debtor.balance), creditor.balance);
+            amount = Math.round(amount * 100) / 100;
+
+            if (amount > 0) {
+                let div = document.createElement('div');
+                div.className = 'settlement-row';
+                div.innerHTML = `
+                    <span>${debtor.name}</span>
+                    <span class="arrow">pays</span>
+                    <span>${creditor.name}</span>
+                    <span style="flex-grow:1"></span>
+                    <span class="money">$${amount.toFixed(2)}</span>
+                `;
+                container.appendChild(div);
+            }
+
+            debtor.balance += amount;
+            creditor.balance -= amount;
+
+            if (Math.abs(debtor.balance) < 0.01) i++;
+            if (creditor.balance < 0.01) j++;
+        }
+    }
+}
+window.onload = calculateDebts;
+</script>
+
+</body>
+</html>
